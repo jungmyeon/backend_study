@@ -1,23 +1,21 @@
 package com.example.demo.payment.application;
 
-import com.example.demo.payment.application.dto.PaymentCommand;
-import com.example.demo.payment.application.dto.PaymentFailCommand;
-import com.example.demo.payment.application.dto.PaymentFailureInfo;
-import com.example.demo.payment.application.dto.PaymentInfo;
-import com.example.demo.payment.client.TossPaymentClient;
-import com.example.demo.payment.client.dto.TossPaymentResponse;
+import com.example.demo.payment.application.dto.*;
+import com.example.demo.payment.application.event.PaymentConfirmedEvent;
 import com.example.demo.payment.domain.model.Payment;
 import com.example.demo.payment.domain.model.PaymentFailure;
 import com.example.demo.payment.domain.repository.PaymentFailureRepository;
 import com.example.demo.payment.domain.repository.PaymentRepository;
+import com.example.demo.payment.infrastructure.acl.TossPaymentAcl;
 import lombok.AllArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -25,7 +23,8 @@ import java.util.List;
 public class PaymentService implements PaymentUsecase{
     private final PaymentRepository paymentRepository;
     private final PaymentFailureRepository paymentFailureRepository;
-    private final TossPaymentClient tossPaymentClient;
+    private final TossPaymentAcl tossPaymentAcl;
+    private final ApplicationEventPublisher eventPublisher;
 
     public ResponseEntity<List<PaymentInfo>> findAll(Pageable pageable) {
         Page<Payment> page = paymentRepository.findAll(pageable);
@@ -35,21 +34,27 @@ public class PaymentService implements PaymentUsecase{
         return ResponseEntity.status(HttpStatus.OK).body(payments);
     }
 
+    @Transactional
     public ResponseEntity<PaymentInfo> confirm(PaymentCommand command) {
-        TossPaymentResponse tossPayment = tossPaymentClient.confirm(command);
-//        UUID orderId = UUID.fromString(tossPayment.orderId());
+        PaymentConfirmation confirmation = tossPaymentAcl.confirm(command);
+//        UUID orderId = UUID.fromString(confirmation.orderId());
 //        PurchaseOrder order = orderService.findEntity(orderId);
         Payment payment = Payment.create(
-                tossPayment.paymentKey(),
-                tossPayment.orderId(),
-                tossPayment.totalAmount()
+                confirmation.paymentKey(),
+                confirmation.orderId(),
+                confirmation.totalAmount()
         );
-        LocalDateTime approvedAt = tossPayment.approvedAt() != null ? tossPayment.approvedAt().toLocalDateTime() : null;
-        LocalDateTime requestedAt = tossPayment.requestedAt() != null ? tossPayment.requestedAt().toLocalDateTime() : null;
 
-        payment.markConfirmed(tossPayment.method(), approvedAt, requestedAt);
+        payment.markConfirmed(confirmation.method(), confirmation.approvedAt(), confirmation.requestedAt());
 
         Payment saved = paymentRepository.save(payment);
+        eventPublisher.publishEvent(new PaymentConfirmedEvent(
+                saved.getId(),
+                saved.getOrderId(),
+                saved.getPaymentKey(),
+                saved.getAmount(),
+                saved.getApprovedAt()
+        ));
         return ResponseEntity.status(HttpStatus.CREATED).body(PaymentInfo.from(saved));
     }
 

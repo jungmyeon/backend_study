@@ -61,7 +61,7 @@ public class Order {
     @Comment("주문 상태(PAID, CANCELED, REFUNDED 등)")
     private String status;
 
-    @Column(name = "paid_at", nullable = false)
+    @Column(name = "paid_at")
     @Comment("결제 완료 시각")
     private LocalDateTime paidAt;
 
@@ -152,6 +152,12 @@ public class Order {
         this.modifyId = actorId;
     }
 
+    public void markPaid(LocalDateTime paidAt, UUID actorId) {
+        this.status = "PAID";
+        this.paidAt = paidAt == null ? LocalDateTime.now() : paidAt;
+        this.modifyId = actorId;
+    }
+
     @PrePersist
     public void onCreate() {
         if (id == null) {
@@ -164,10 +170,7 @@ public class Order {
             quantity = 1;
         }
         if (status == null || status.isBlank()) {
-            status = "PAID";
-        }
-        if (paidAt == null) {
-            paidAt = LocalDateTime.now();
+            status = "READY";
         }
         if (settled == null) {
             settled = false;
