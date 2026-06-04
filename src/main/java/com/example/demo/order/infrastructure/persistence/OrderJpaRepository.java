@@ -17,4 +17,5 @@ public interface OrderJpaRepository extends JpaRepository<Order, UUID> {
             LocalDateTime fromInclusive,
             LocalDateTime toExclusive
     );
+
 }

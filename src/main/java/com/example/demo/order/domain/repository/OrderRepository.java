@@ -18,4 +18,6 @@ public interface OrderRepository {
     Order save(Order order);
 
     List<Order> findUnsettledPaidOrders(LocalDateTime fromInclusive, LocalDateTime toExclusive);
+
+
 }
