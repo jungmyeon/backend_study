@@ -1,26 +1,27 @@
 server:
   port: 8081
+
 spring:
   config:
     import: optional:file:.env[.properties]
   application:
-    name: demo
-  datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:postgres}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:4177}
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    show-sql: true
-    properties:
-      hibernate:
-        ddl-auto: update
-
-  batch:
-    job:
-     enabled: false
-    jdbc:
-      initialize-schema: always
+    name: demo-service
+#  datasource:
+#    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:postgres}
+#    username: ${DB_USERNAME:postgres}
+#    password: ${DB_PASSWORD:4177}
+#    driver-class-name: org.postgresql.Driver
+#  jpa:
+#    show-sql: true
+#    properties:
+#      hibernate:
+#        ddl-auto: update
+#
+#  batch:
+#    job:
+#     enabled: false
+#    jdbc:
+#      initialize-schema: always
 
 payment:
   toss:
@@ -33,3 +34,30 @@ settlement:
   batch:
     cron: "0 0 3 * * *"
     actor-id: 00000000-0000-0000-0000-000000000000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, beans, info
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://admin:admin@${eureka.instance.hostname:localhost}:8761/eureka
+
+
+jwt:
+  private-key: MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCHQ9FNVX0DbXp2chE5D+ettQLZuB53BpeA1XV6hcTAS7Vwrwilt7ejAJ6l9tsP6HS7yLAkpyFzUqiVxa3z+/P8mzK9h7fVmAKhFOU7a9iC0NYpjo8hPwwZFKR/K4BYN7f/OZyG2ZUG7F/B/kTvkxngndYuQXAhQvh9rpWGSgXd6sC7eD3eoQ24rNC+kXaNt5GoOAgGff3GqGNdTpe+24fFPKmz71p3t7KD0qWN/gNI1NdNzpIeFOvEet8OTvnvpT+q6mVqI6o4oMtKq794lCA/pkfK3kCQ5VN9bImXXL4B/O9hfhZDBezIPrrtZirMrYk9OqVJ16+264Iso14AbzCbAgMBAAECggEANk58EdhowJ+Ls1JIp+hC0/MAmfjaAl+bJBaPfAmI3MuIpR0hE6eXCtKM34UknlZtx5bjYVPYkjx1guxC0totMxX8YSvEGvVU2OdSwXCjFKJT2Ytq26Y8bTVkdco5VTHJpaazuVBSDN2J9JDpjGY61XuJKjkLk88XhR462heOE3I/UjO/d0k8Vlwsc880j4TEDIEbCT9zbKRlqtd67iA3MpoOj2LOd0WcaO7e42Kxr1IQVD5hC1+XyWZmLjSinN0VTj8bjmvWIHrfKd2nTXAq7nn0ZTEc0QXux4mfXuWYnYg1mQSolIiUEwbGORhgs4La71XCjNbTcLnvgbJcHi99QQKBgQC5CJry2O4LBrb6PRqelCxSqQLehFGmvEzVHmMlBtCGTdmJYlv7JP8UwrNzXkAAtrjAbTvtehc5ZYuTMxALQw4OZMHDTfrbElM765NcAf9k1TfBFhIN9WeoX+eZAoa4s1aCvLsQ89D5Snn559cL9VHfc2C9ZARzhd4XhQc0Bz8/1wKBgQC7JLUdJdafsVUonz1R4IvBl48Q964fqOjhxTaUrakJiKeINvFXIVV/Bg1LscoaXmQDM47HGsLmgsGwX+1uTzD5RzSaMeGfoM5Njfun7ZieyRwSHg4axN9agK1suTbuKORZy6hOxjSiRiqgzJjpBO9U7UJrkdPa5uanBP59uAEM3QKBgFUOXZvwmEw9Q/N4DzqCRnWg946uKJKK0I7PLyggH879DliW/E1QTmmOrssDskwhsn/SNtANZYue4DBEMsXahyWar29F82Cs5dIPkmejC3GgicaajKYZ/xJpM58kiCVzWvsyIpPCYHeYAsYcCsCWfpJHCVtGFL299b++CPejtTF1AoGBALFc+MnHMsHmr27wfI084zd3DIBoPP6EdzKCVlhSvgHrIdxXNiP906mvcqpqtcCH9QGTu524Hz+YbTlbsQr6ws9+TLxWyh8fqGaYSgm9hQf4UkJZecSlEYoUqkiAwS62UrVH7xu5fejN11jOj51IsAstUeXhL4gnjjJ86TT9TwGBAoGAXUNffv0JFq2x3jTqKlARAeD7lINRvX9zbJM/UHINWLLLzj34l60xAod3KxHp07K9vEpiI5mz3SWqVso4NWiIfChk9tH2gRQEGK9FnorCe9OvSR2s3lsSgOyYkm6DL9K6uz4k+mLTHjEHaqsXGCge+BSw1aiohF0nRHPMxZNO948=
+  public-key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAh0PRTVV9A216dnIROQ/nrbUC2bgedwaXgNV1eoXEwEu1cK8Ipbe3owCepfbbD+h0u8iwJKchc1KolcWt8/vz/JsyvYe31ZgCoRTlO2vYgtDWKY6PIT8MGRSkfyuAWDe3/zmchtmVBuxfwf5E75MZ4J3WLkFwIUL4fa6VhkoF3erAu3g93qENuKzQvpF2jbeRqDgIBn39xqhjXU6XvtuHxTyps+9ad7eyg9Kljf4DSNTXTc6SHhTrxHrfDk7576U/quplaiOqOKDLSqu/eJQgP6ZHyt5AkOVTfWyJl1y+AfzvYX4WQwXsyD667WYqzK2JPTqlSdevtuuCLKNeAG8wmwIDAQAB
+
+springdoc:
+  api-docs:
+    version: OPENAPI_3_0
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    servers:
+      - url: http://localhost:8081
